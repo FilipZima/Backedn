@@ -27,13 +27,39 @@ namespace ReactApp1.Server.Controllers
 
             try
             {
-                var result = await _contactService.StoreContactAsync(contact);
-                return Ok(result);
+                await _contactService.StoreContactAsync(contact);
+                return Ok("Gay");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error storing contact");
                 return StatusCode(500, "An error occurred while storing the contact");
+            }
+        }
+
+        [HttpGet("/Contact/StoreAll")]
+        public string Get()
+        {
+            return _contactService.GetAllJson();
+        }
+
+        // New long-polling endpoint: client passes known version and waits for changes
+        [HttpGet("/Contact/WaitForChanges")]
+        public async Task<IActionResult> WaitForChanges([FromQuery] long sinceVersion = 0, [FromQuery] int timeoutMs = 30000, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var (json, version) = await _contactService.WaitForChangesAsync(sinceVersion, timeoutMs, cancellationToken);
+                return Ok(new { json, version });
+            }
+            catch (OperationCanceledException)
+            {
+                return StatusCode(204); // No content if cancelled
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error waiting for changes");
+                return StatusCode(500);
             }
         }
     }
