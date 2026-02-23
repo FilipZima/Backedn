@@ -25,6 +25,7 @@ export default function App() {
 
     return (
         <div style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "10px", maxWidth: "300px" }}>
+            <h1>Jsi gay</h1>
             <input
                 value={inputName}
                 onChange={(e) => setInputName(e.target.value)}
